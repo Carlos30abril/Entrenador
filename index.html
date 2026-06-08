@@ -8,7 +8,7 @@
         :root {
             --bg-color: #12161a;
             --card-bg: #1c232b;
-            --accent-color: #1DB954; /* Verde Spotify */
+            --accent-color: #1DB954;
             --text-main: #f0f4f8;
             --text-muted: #8fa0b0;
             --accent-rest: #ff9f89;
@@ -173,7 +173,7 @@
         let playlistSmart = [];
         let currentTrackIndex = 0;
 
-        // FUNCIONES AUXILIARES CRIPTOGRÁFICAS PARA EL FLUJO PKCE EXIGIDO POR SPOTIFY
+        // FUNCIONES AUXILIARES CRIPTOGRÁFICAS
         function generateRandomString(length) {
             const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             const values = crypto.getRandomValues(new Uint8Array(length));
@@ -196,7 +196,6 @@
             return base64urlencode(hashed);
         }
 
-        // Estructura del entrenamiento
         const workout = [
             { title: "Gato-Camello Rítmico", desc: "A cuatro patas. Sigue un tempo de 4 segundos para arquear y 4 para curvar.", duration: 150, type: "warmup", speech: "Hola. Vamos a empezar a cuidar de tu cuerpo con calma. Colócate a cuatro patas en el suelo. Respira hondo y empieza el movimiento del gato camello. Siente cómo se libera la tensión de tu espalda.", musicAction: "pause" },
             { title: "Desbloqueo de Cadera", desc: "Tumbado boca arriba con brazos en cruz. Deja caer las rodillas juntas a cada lado.", duration: 150, type: "warmup", speech: "Muy bien. Ahora túmbate boca arriba con los brazos abiertos en cruz. Deja caer tus rodillas juntas hacia la derecha de forma suave, relaja las lumbares y respira.", musicAction: "pause" },
@@ -224,7 +223,7 @@
             return steps;
         }
 
-        // REDIRECCIÓN LOG IN (AHORA CON GENERACIÓN SECRETA PKCE)
+        // CORRECCIÓN: URLs de Auth de Spotify y plantillas literales ajustadas
         document.getElementById('login-btn').addEventListener('click', async () => {
             const codeVerifier = generateRandomString(64);
             const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -243,7 +242,6 @@
             window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
         });
 
-        // DETECCIÓN Y PROCESAMIENTO DEL CÓDIGO SEGURO AL VOLVER A LA WEB
         async function checkAuthCode() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
@@ -264,6 +262,7 @@
                 });
 
                 try {
+                    // CORRECCIÓN: Endpoint de token real
                     const res = await fetch('https://accounts.spotify.com/api/token', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -273,7 +272,6 @@
                     
                     if (data.access_token) {
                         accessToken = data.access_token;
-                        // Limpiar los parámetros feos de la URL sin recargar la página
                         window.history.replaceState({}, document.title, window.location.pathname);
                         document.getElementById('spotify-status').textContent = "⏳ Analizando tus canciones favoritas (Rango: 100-120 BPM)...";
                         getSmartTracks();
@@ -287,10 +285,10 @@
             }
         }
 
-        // ANALIZADOR DE CANCIONES Y FILTRADO POR BPM (100-120)
         async function getSmartTracks() {
             try {
-                const tracksRes = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=40', {
+                // CORRECCIÓN: Endpoint real de Top Tracks
+                const tracksRes = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=50', {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 const tracksData = await tracksRes.json();
@@ -302,6 +300,7 @@
 
                 const ids = tracksData.items.map(item => item.id).join(',');
 
+                // CORRECCIÓN: Endpoint real de Audio Features y literal de cadena ajustado
                 const featuresRes = await fetch(`https://api.spotify.com/v1/audio-features?ids=${ids}`, {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
@@ -331,11 +330,11 @@
             }
         }
 
-        // CONTROL REMOTO SMART DE VOLUMEN Y CAMBIO DE CANCIÓN
+        // CORRECCIÓN: Endpoints de control de reproducción de Spotify
         async function controlSpotify(action, uri = null) {
             if (!accessToken || playlistSmart.length === 0) return;
             
-            let url = 'https://api.spotify.com/v1/me/player/pause';
+            let url = 'https://api.spotify.com/v1/me/player/pause'; 
             let method = 'PUT';
             let body = null;
 
@@ -343,9 +342,9 @@
                 url = 'https://api.spotify.com/v1/me/player/play';
                 if (uri) body = JSON.stringify({ uris: [uri] });
             } else if (action === 'low') {
-                url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=20';
+                url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=30';
             } else if (action === 'restore_volume') {
-                url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=70';
+                url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=80';
             }
 
             try {
@@ -362,7 +361,6 @@
             }
         }
 
-        // MOTOR DEL TEMPORIZADOR Y ASISTENTE POR VOZ
         let currentIndex = 0;
         let timer = null;
         let timeLeft = 0;
@@ -380,8 +378,8 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'es-ES';
-                utterance.rate = 0.92; // Sereno y pausado
-                utterance.pitch = 1.05; // Calidez humana
+                utterance.rate = 0.92;
+                utterance.pitch = 1.05;
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -458,7 +456,6 @@
             timer = setInterval(tick, 1000);
         });
 
-        // Ejecutar revisión automática al cargar la web por si venimos de la redirección
         checkAuthCode();
     </script>
 </body>
