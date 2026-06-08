@@ -33,41 +33,6 @@
             background: var(--card-bg);
             padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 10px <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ritmo y Sincopación - Smart Spotify Edition</title>
-    <style>
-        :root {
-            --bg-color: #12161a;
-            --card-bg: #1c232b;
-            --accent-color: #1DB954;
-            --text-main: #f0f4f8;
-            --text-muted: #8fa0b0;
-            --accent-rest: #ff9f89;
-            --btn-voice: #7ce0b3;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             text-align: center;
         }
@@ -198,57 +163,6 @@
         </div>
     </div>
 
-<!DOCTYPE html>
-                timerDisplay.textContent = formatTime(timeLeft);
-                if (timeLeft === 10) speakText("Diez segundos finales, mantén el ritmo suave.");
-            } else {
-                currentIndex++;
-                if (currentIndex < workout.length) {
-                    initStep();
-                } else {
-                    clearInterval(timer);
-                    phaseTitle.textContent = "¡Completado!";
-                    phaseDesc.textContent = "Sesión finalizada. Has cuidado de tu espalda y activado tu abdomen de manera brillante.";
-                    trackPlaying.textContent = "";
-                }
-            }
-        }
-
-        async function initStep() {
-            const current = workout[currentIndex];
-            timeLeft = current.duration;
-            updateUI();
-            
-            speakText(current.speech);
-
-            if (current.musicAction === 'play' && playlistSmart.length > 0) {
-                const track = playlistSmart[currentTrackIndex];
-                trackPlaying.textContent = `🔊 Sonando en tu Spotify: ${track.name} - ${track.artist} (${track.bpm} BPM)`;
-                await controlSpotify('restore_volume');
-                await controlSpotify('play', track.uri);
-                currentTrackIndex = (currentTrackIndex + 1) % playlistSmart.length;
-            } else if (current.musicAction === 'low') {
-                await controlSpotify('low');
-                trackPlaying.textContent = "💤 Bajando volumen de la música para descansar...";
-            } else if (current.musicAction === 'pause' || current.musicAction === 'stop') {
-                await controlSpotify('pause');
-                trackPlaying.textContent = "";
-            }
-        }
-
-        startBtn.addEventListener('click', () => {
-            speakText(""); 
-            currentIndex = 0;
-            startBtn.classList.add('hidden');
-            initStep();
-            clearInterval(timer);
-            timer = setInterval(tick, 1000);
-        });
-
-        checkAuthCode();
-    </script>
-</body>
-</html>
 <script>
     // CONFIGURACIÓN DE TU CLIENT ID DE SPOTIFY
     const CLIENT_ID = '8e29fe6adc0d43b7b9c67520ebe4e17a'; 
