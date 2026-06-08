@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritmo y Sincopación - Smart Spotify Edition</title>
+    <style>
+        :root {
+            --bg-color: #12161a;
+            --card-bg: #1c232b;
+            --accent-color: #1DB954; /* Verde Spotify */
+            --text-main: #f0f4f8;
+            --text-muted: #8fa0b0;
+            --accent-rest: #ff9f89;
+            --btn-voice: #7ce0b3;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .spotify-panel {
+            background: rgba(29, 185, 84, 0.1);
+            border: 1px solid rgba(29, 185, 84, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .timer-display {
+            font-size: 4.5rem;
+            font-weight: 700;
+            margin: 20px 0;
+            color: var(--btn-voice);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-display.rest {
+            color: var(--accent-rest);
+        }
+
+        .status-box {
+            background: rgba(255,255,255,0.03);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+
+        .current-phase {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .current-instruction {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .track-info {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--accent-color);
+            font-size: 0.85rem;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 15px;
+        }
+
+        .btn {
+            background: var(--btn-voice);
+            color: #0b0f12;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, opacity 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn-spotify {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Ritmo, Sincopación & Spotify</h1>
+        <div class="subtitle">Tu entrenamiento inteligente adaptado a tus gustos</div>
+
+        <div class="spotify-panel" id="spotify-status">
+            🔒 Requiere vinculación con Spotify Premium.
+        </div>
+
+        <button class="btn btn-spotify" id="login-btn">Conectar mi Spotify</button>
+
+        <div id="workout-ui" class="hidden">
+            <div class="timer-display" id="timer">00:00</div>
+
+            <div class="status-box">
+                <div class="current-phase" id="phase-title">¿Preparado?</div>
+                <div class="current-instruction" id="phase-desc">Inicia el entrenamiento. La IA se encargará de guiarte y gestionar la música.</div>
+                <div class="track-info" id="track-playing"></div>
+            </div>
+
+            <div class="meta-info">
+                <span id="info-round">Bloque: —</span>
+                <span id="info-next">Siguiente: —</span>
+            </div>
+
+            <button class="btn" id="start-btn">Iniciar Sesión Inteligente</button>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN DE TU CLIENT ID DE SPOTIFY
+        const CLIENT_ID = 'TU_CLIENT_ID_AQUÍ'; 
+        const REDIRECT_URI = window.location.href.split('#')[0];
+        const SCOPES = 'user-top-read user-modify-playback-state user-read-playback-state';
+
+        let accessToken = null;
+        let playlistSmart = [];
+        let currentTrackIndex = 0;
+
+        // Estructura básica del entrenamiento
+        const workout = [
+            { title: "Gato-Camello Rítmico", desc: "A cuatro patas. Sigue un tempo de 4 segundos para arquear y 4 para curvar.", duration: 150, type: "warmup", speech: "Hola. Vamos a empezar a cuidar de tu cuerpo con calma. Colócate a cuatro patas en el suelo. Respira hondo y empieza el movimiento del gato camello. Siente cómo se libera la tensión de tu espalda.", musicAction: "pause" },
+            { title: "Desbloqueo de Cadera", desc: "Tumbado boca arriba con brazos en cruz. Deja caer las rodillas juntas a cada lado.", duration: 150, type: "warmup", speech: "Muy bien. Ahora túmbate boca arriba con los brazos abiertos en cruz. Deja caer tus rodillas juntas hacia la derecha de forma suave, relaja las lumbares y respira.", musicAction: "pause" },
+            ...generateRounds(),
+            { title: "Respiración Diafragmática", desc: "Tumbado boca arriba con manos en la barriga. Relájate por completo.", duration: 120, type: "cool-down", speech: "El esfuerzo principal ha terminado, lo has hecho genial. Quédate tumbado boca arriba, pon tus manos sobre la barriga y respira hondo.", musicAction: "pause" },
+            { title: "Protocolo de Cuidado y Ducha", desc: "Quítate la ropa sudada inmediatamente. Dúchate con agua templada.", duration: 180, type: "cool-down", speech: "Sesión completada perfectamente. Ahora, ve directo a quitarte la ropa usada y disfruta de una ducha templada. Cuida mucho tu piel.", musicAction: "stop" }
+        ];
+
+        function generateRounds() {
+            let steps = [];
+            for(let r = 1; r <= 4; r++) {
+                steps.push(
+                    { title: `Ronda ${r}/4: Sentadilla Adagio & Allegro`, desc: "Baja controlado en 3 tiempos de tu música. Sube rápido en el 1º del siguiente compás.", duration: 45, type: "work", round: r, speech: `Ronda ${r}. Al ritmo de tu música, haz la sentadilla a la silla. Baja despacio en tres tiempos y sube rápido. Sincronízate.`, musicAction: "play" },
+                    { title: "Descanso Activo", desc: "Respira hondo, relaja los brazos, muévete un poco por la habitación.", duration: 45, type: "rest", round: r, speech: "Tiempo de descanso. Suelta las piernas y respira con calma.", musicAction: "low" },
+                    { title: `Ronda ${r}/4: El Contrapunto del Escarabajo`, desc: "Espalda baja pegada al suelo. Estira extremidades alternas en 2 tiempos con el ritmo.", duration: 45, type: "work", round: r, speech: "Vamos al suelo para el escarabajo. Pega tu espalda baja a la manta. Mueve tus extremidades siguiendo el pulso de tu música.", musicAction: "play" },
+                    { title: "Descanso Activo", desc: "Suelta el cuerpo en el suelo, respira profundo expandiendo el abdomen.", duration: 45, type: "rest", round: r, speech: "Descansa un poco. Deja que el abdomen se relaje por completo.", musicAction: "low" },
+                    { title: `Ronda ${r}/4: El Canon Lumbar`, desc: "A cuatro patas. Mantén brazo y pierna estirados fijos durante una frase musical completa.", duration: 45, type: "work", round: r, speech: "Colócate a cuatro patas para el canon lumbar. Estira brazo y pierna contraria, y mantén la posición fija en armonía con la melodía.", musicAction: "play" },
+                    { title: "Descanso Activo", desc: "Siéntate sobre tus talones un momento, relaja los hombros.", duration: 45, type: "rest", round: r, speech: "Aprovecha para descansar de forma activa.", musicAction: "low" },
+                    { title: `Ronda ${r}/4: Isometría Inclinada en Ostinato`, desc: "Manos en la encimera. Baja a mitad de camino y quédate quieto durante 4 tiempos musicales.", duration: 45, type: "work", round: r, speech: "Último esfuerzo del bloque. Flexión inclinada. Baja a mitad de recorrido y aguanta cuatro tiempos de la música con el abdomen duro.", musicAction: "play" }
+                );
+                if(r < 4) {
+                    steps.push({ title: "Descanso de Bloque Completo", desc: "Camina un poco, hidrátate bien con agua.", duration: 120, type: "long-rest", round: r, speech: `Has terminado la ronda ${r}. Nos tomamos dos minutos enteros de descanso. Bebe un sorbo de agua sin prisa.`, musicAction: "low" });
+                }
+            }
+            return steps;
+        }
+
+        // CONTROL DE OAUTH Y DE INTERFAZ DE SPOTIFY
+        document.getElementById('login-btn').addEventListener('click', () => {
+            const url = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES)}&response_type=token&show_dialog=true`;
+            window.location.href = url;
+        });
+
+        // Comprobar si volvemos de la autenticación
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        accessToken = params.get('access_token');
+
+        if (accessToken) {
+            document.getElementById('login-btn').classList.add('hidden');
+            document.getElementById('workout-ui').classList.remove('hidden');
+            document.getElementById('spotify-status').textContent = "⏳ Analizando tus gustos musicales y buscando canciones entre 100 y 120 BPM...";
+            getSmartTracks();
+        }
+
+        // CONSUMO DE API: FILTRADO INTELIGENTE POR GUSTOS Y BPM (100-120)
+        async function getSmartTracks() {
+            try {
+                // 1. Obtener las 40 canciones que más escucha el usuario
+                const tracksRes = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=40', {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                const tracksData = await tracksRes.json();
+                
+                if(!tracksData.items || tracksData.items.length === 0) {
+                    document.getElementById('spotify-status').textContent = "⚠️ No pudimos leer tus canciones más escuchadas. Abre Spotify en tu móvil/PC y dale a Play primero.";
+                    return;
+                }
+
+                const ids = tracksData.items.map(item => item.id).join(',');
+
+                // 2. Consultar las "Audio Features" para comprobar los BPM de esas canciones
+                const featuresRes = await fetch(`https://api.spotify.com/v1/audio-features?ids=${ids}`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                const featuresData = await featuresRes.json();
+
+                // 3. Filtrar estrictamente el rango meta (100-120 BPM)
+                playlistSmart = [];
+                featuresData.audio_features.forEach((feat, index) => {
+                    if (feat && feat.tempo >= 100 && feat.tempo <= 120) {
+                        playlistSmart.push({
+                            uri: tracksData.items[index].uri,
+                            name: tracksData.items[index].name,
+                            artist: tracksData.items[index].artists[0].name,
+                            bpm: Math.round(feat.tempo)
+                        });
+                    }
+                });
+
+                if (playlistSmart.length > 0) {
+                    document.getElementById('spotify-status').innerHTML = `🎵 <b>Sincronización con éxito</b>. Hemos detectado ${playlistSmart.length} canciones de tus favoritas con el ritmo perfecto (100-120 BPM). Asegúrate de tener Spotify abierto en tu dispositivo.`;
+                } else {
+                    document.getElementById('spotify-status').textContent = "🎵 No encontramos temas de 100-120 BPM en tus más escuchados. Usaremos una cola de reproducción estándar basada en tus artistas.";
+                    // Fallback: Usar directamente las top tracks generales
+                    playlistSmart = tracksData.items.map(t => ({ uri: t.uri, name: t.name, artist: t.artists[0].name, bpm: 'N/A' }));
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('spotify-status').textContent = "❌ Error al conectar con el motor de análisis de Spotify.";
+            }
+        }
+
+        // MOTOR DE REPRODUCCIÓN MEDIANTE SPOTIFY CONNECT
+        async function controlSpotify(action, uri = null) {
+            if (!accessToken || playlistSmart.length === 0) return;
+            
+            let url = 'https://api.spotify.com/v1/me/player/pause';
+            let method = 'PUT';
+            let body = null;
+
+            if (action === 'play') {
+                url = 'https://api.spotify.com/v1/me/player/play';
+                if (uri) {
+                    body = JSON.stringify({ uris: [uri] });
+                }
+            } else if (action === 'low') {
+                // Para los descansos, en lugar de pausar radicalmente, bajamos volumen o dejamos el reproductor activo
+                url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=25';
+                method = 'PUT';
+            } else if (action === 'restore_volume') {
+                url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=75';
+                method = 'PUT';
+            }
+
+            try {
+                await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: body
+                });
+            } catch (e) {
+                console.log("Spotify Connect: Asegúrate de tener el reproductor abierto y activo en tu PC o móvil.");
+            }
+        }
+
+        // LÓGICA DEL ENTRENAMIENTO Y ASISTENTE POR VOZ HUMANA
+        let currentIndex = 0;
+        let timer = null;
+        let timeLeft = 0;
+
+        const timerDisplay = document.getElementById("timer");
+        const phaseTitle = document.getElementById("phase-title");
+        const phaseDesc = document.getElementById("phase-desc");
+        const trackPlaying = document.getElementById("track-playing");
+        const infoRound = document.getElementById("info-round");
+        const infoNext = document.getElementById("info-next");
+        const startBtn = document.getElementById("start-btn");
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                utterance.rate = 0.92; // Tono calmado, pausado y empático
+                utterance.pitch = 1.05; // Calidez afectiva humana
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function updateUI() {
+            const current = workout[currentIndex];
+            timerDisplay.textContent = formatTime(timeLeft);
+            phaseTitle.textContent = current.title;
+            phaseDesc.textContent = current.desc;
+
+            if (current.type === 'rest' || current.type === 'long-rest') {
+                timerDisplay.classList.add('rest');
+            } else {
+                timerDisplay.classList.remove('rest');
+            }
+
+            infoRound.textContent = current.round ? `Bloque: Ronda ${current.round}/4` : "Bloque: Transición";
+            const next = workout[currentIndex + 1];
+            infoNext.textContent = next ? `Siguiente: ${next.title}` : "Siguiente: Fin";
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function tick() {
+            if (timeLeft > 0) {
+                timeLeft--;
+                timerDisplay.textContent = formatTime(timeLeft);
+                if (timeLeft === 10) speakText("Diez segundos finales, lo estás haciendo genial.");
+            } else {
+                currentIndex++;
+                if (currentIndex < workout.length) {
+                    initStep();
+                } else {
+                    clearInterval(timer);
+                    phaseTitle.textContent = "¡Misión Cumplida!";
+                    phaseDesc.textContent = "Has completado la sesión protegiendo tu salud y tu postura. Increíble.";
+                    trackPlaying.textContent = "";
+                }
+            }
+        }
+
+        async function initStep() {
+            const current = workout[currentIndex];
+            timeLeft = current.duration;
+            updateUI();
+            
+            // Hablar primero
+            speakText(current.speech);
+
+            // Gestionar Spotify de forma inteligente según la fase del ejercicio
+            if (current.musicAction === 'play' && playlistSmart.length > 0) {
+                const track = playlistSmart[currentTrackIndex];
+                trackPlaying.textContent = `🔊 Sonando en tu Spotify: ${track.name} - ${track.artist} (${track.bpm} BPM)`;
+                await controlSpotify('restore_volume');
+                await controlSpotify('play', track.uri);
+                
+                // Rotar canción para el próximo ejercicio dinámicamente
+                currentTrackIndex = (currentTrackIndex + 1) % playlistSmart.length;
+            } else if (current.musicAction === 'low') {
+                await controlSpotify('low');
+                trackPlaying.textContent = "💤 Música de fondo relajada para recuperar pulsaciones...";
+            } else if (current.musicAction === 'pause' || current.musicAction === 'stop') {
+                await controlSpotify('pause');
+                trackPlaying.textContent = "";
+            }
+        }
+
+        startBtn.addEventListener('click', () => {
+            speakText(""); // Forzar activación de voz en navegadores
+            currentIndex = 0;
+            startBtn.classList.add('hidden');
+            initStep();
+            clearInterval(timer);
+            timer = setInterval(tick, 1000);
+        });
+    </script>
+</body>
+</html>
