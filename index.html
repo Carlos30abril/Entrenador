@@ -33,6 +33,41 @@
             background: var(--card-bg);
             padding: 30px;
             border-radius: 20px;
+            box-shadow: 0 10px <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritmo y Sincopación - Smart Spotify Edition</title>
+    <style>
+        :root {
+            --bg-color: #12161a;
+            --card-bg: #1c232b;
+            --accent-color: #1DB954;
+            --text-main: #f0f4f8;
+            --text-muted: #8fa0b0;
+            --accent-rest: #ff9f89;
+            --btn-voice: #7ce0b3;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             text-align: center;
         }
@@ -163,253 +198,7 @@
         </div>
     </div>
 
-    <script>
-        // CONFIGURACIÓN DE TU CLIENT ID DE SPOTIFY
-        const CLIENT_ID = '8e29fe6adc0d43b7b9c67520ebe4e17a'; 
-        const REDIRECT_URI = window.location.href.split('?')[0].split('#')[0];
-        const SCOPES = 'user-top-read user-modify-playback-state user-read-playback-state';
-
-        let accessToken = null;
-        let playlistSmart = [];
-        let currentTrackIndex = 0;
-
-        // FUNCIONES AUXILIARES CRIPTOGRÁFICAS
-        function generateRandomString(length) {
-            const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            const values = crypto.getRandomValues(new Uint8Array(length));
-            return Array.from(values).map((x) => possible[x % possible.length]).join('');
-        }
-
-        async function sha256(plain) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(plain);
-            return window.crypto.subtle.digest('SHA-256', data);
-        }
-
-        function base64urlencode(a) {
-            return btoa(String.fromCharCode.apply(null, new Uint8Array(a)))
-                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        }
-
-        async function generateCodeChallenge(v) {
-            const hashed = await sha256(v);
-            return base64urlencode(hashed);
-        }
-
-        const workout = [
-            { title: "Gato-Camello Rítmico", desc: "A cuatro patas. Sigue un tempo de 4 segundos para arquear y 4 para curvar.", duration: 150, type: "warmup", speech: "Hola. Vamos a empezar a cuidar de tu cuerpo con calma. Colócate a cuatro patas en el suelo. Respira hondo y empieza el movimiento del gato camello. Siente cómo se libera la tensión de tu espalda.", musicAction: "pause" },
-            { title: "Desbloqueo de Cadera", desc: "Tumbado boca arriba con brazos en cruz. Deja caer las rodillas juntas a cada lado.", duration: 150, type: "warmup", speech: "Muy bien. Ahora túmbate boca arriba con los brazos abiertos en cruz. Deja caer tus rodillas juntas hacia la derecha de forma suave, relaja las lumbares y respira.", musicAction: "pause" },
-            ...generateRounds(),
-            { title: "Respiración Diafragmática", desc: "Tumbado boca arriba con manos en la barriga. Relájate por completo.", duration: 120, type: "cool-down", speech: "El esfuerzo principal ha terminado, lo has hecho genial. Quédate tumbado boca arriba, pon tus manos sobre la barriga y respira hondo.", musicAction: "pause" },
-            { title: "Protocolo de Cuidado y Ducha", desc: "Quítate la ropa sudada inmediatamente. Dúchate con agua templada.", duration: 180, type: "cool-down", speech: "Sesión completada perfectamente. Ahora, ve directo a quitarte la ropa usada y disfruta de una ducha templada. Cuida mucho tu piel.", musicAction: "stop" }
-        ];
-
-        function generateRounds() {
-            let steps = [];
-            for(let r = 1; r <= 4; r++) {
-                steps.push(
-                    { title: `Ronda ${r}/4: Sentadilla Adagio & Allegro`, desc: "Baja controlado en 3 tiempos de tu música. Sube rápido en el 1º del siguiente compás.", duration: 45, type: "work", round: r, speech: `Ronda ${r}. Al ritmo de tu música, haz la sentadilla a la silla. Baja despacio en tres tiempos y sube rápido. Sincronízate.`, musicAction: "play" },
-                    { title: "Descanso Activo", desc: "Respira hondo, relaja los brazos, muévete un poco por la habitación.", duration: 45, type: "rest", round: r, speech: "Tiempo de descanso. Suelta las piernas y respira con calma.", musicAction: "low" },
-                    { title: `Ronda ${r}/4: El Contrapunto del Escarabajo`, desc: "Espalda baja pegada al suelo. Estira extremidades alternas en 2 tiempos con el ritmo.", duration: 45, type: "work", round: r, speech: "Vamos al suelo para el escarabajo. Pega tu espalda baja a la manta. Mueve tus extremidades siguiendo el pulso de tu música.", musicAction: "play" },
-                    { title: "Descanso Activo", desc: "Suelta el cuerpo en el suelo, respira profundo expandiendo el abdomen.", duration: 45, type: "rest", round: r, speech: "Descansa un poco. Deja que el abdomen se relaje por completo.", musicAction: "low" },
-                    { title: `Ronda ${r}/4: El Canon Lumbar`, desc: "A cuatro patas. Mantén brazo y pierna estirados fijos durante una frase musical completa.", duration: 45, type: "work", round: r, speech: "Colócate a cuatro patas para el canon lumbar. Estira brazo y pierna contraria, y mantén la posición fija en armonía con la melodía.", musicAction: "play" },
-                    { title: "Descanso Activo", desc: "Siéntate sobre tus talones un momento, relaja los hombros.", duration: 45, type: "rest", round: r, speech: "Aprovecha para descansar de forma activa.", musicAction: "low" },
-                    { title: `Ronda ${r}/4: Isometría Inclinada en Ostinato`, desc: "Manos en la encimera. Baja a mitad de camino y quédate quieto durante 4 tiempos musicales.", duration: 45, type: "work", round: r, speech: "Último esfuerzo del bloque. Flexión inclinada. Baja a mitad de recorrido y aguanta cuatro tiempos de la música con el abdomen duro.", musicAction: "play" }
-                );
-                if(r < 4) {
-                    steps.push({ title: "Descanso de Bloque Completo", desc: "Camina un poco, hidrátate bien con agua.", duration: 120, type: "long-rest", round: r, speech: `Has terminado la ronda ${r}. Nos tomamos dos minutos enteros de descanso. Bebe un sorbo de agua sin prisa.`, musicAction: "low" });
-                }
-            }
-            return steps;
-        }
-
-        // CORRECCIÓN: URLs de Auth de Spotify y plantillas literales ajustadas
-        document.getElementById('login-btn').addEventListener('click', async () => {
-            const codeVerifier = generateRandomString(64);
-            const codeChallenge = await generateCodeChallenge(codeVerifier);
-            
-            window.localStorage.setItem('code_verifier', codeVerifier);
-
-            const params = new URLSearchParams({
-                client_id: CLIENT_ID,
-                response_type: 'code',
-                redirect_uri: REDIRECT_URI,
-                scope: SCOPES,
-                code_challenge_method: 'S256',
-                code_challenge: codeChallenge
-            });
-
-            window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
-        });
-
-        async function checkAuthCode() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-
-            if (code) {
-                document.getElementById('login-btn').classList.add('hidden');
-                document.getElementById('workout-ui').classList.remove('hidden');
-                document.getElementById('spotify-status').textContent = "⏳ Validando credenciales de seguridad con Spotify...";
-
-                const codeVerifier = window.localStorage.getItem('code_verifier');
-
-                const payload = new URLSearchParams({
-                    client_id: CLIENT_ID,
-                    grant_type: 'authorization_code',
-                    code: code,
-                    redirect_uri: REDIRECT_URI,
-                    code_verifier: codeVerifier
-                });
-
-                try {
-                    // CORRECCIÓN: Endpoint de token real
-                    const res = await fetch('https://accounts.spotify.com/api/token', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: payload
-                    });
-                    const data = await res.json();
-                    
-                    if (data.access_token) {
-                        accessToken = data.access_token;
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        document.getElementById('spotify-status').textContent = "⏳ Analizando tus canciones favoritas (Rango: 100-120 BPM)...";
-                        getSmartTracks();
-                    } else {
-                        document.getElementById('spotify-status').textContent = "❌ Error al obtener las llaves de acceso de Spotify.";
-                    }
-                } catch (err) {
-                    console.error(err);
-                    document.getElementById('spotify-status').textContent = "❌ Error crítico de red en la autenticación.";
-                }
-            }
-        }
-
-        async function getSmartTracks() {
-            try {
-                // CORRECCIÓN: Endpoint real de Top Tracks
-                const tracksRes = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=50', {
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
-                });
-                const tracksData = await tracksRes.json();
-                
-                if(!tracksData.items || tracksData.items.length === 0) {
-                    document.getElementById('spotify-status').textContent = "⚠️ No hay historial suficiente en este perfil. Asegúrate de reproducir música en tu app primero.";
-                    return;
-                }
-
-                const ids = tracksData.items.map(item => item.id).join(',');
-
-                // CORRECCIÓN: Endpoint real de Audio Features y literal de cadena ajustado
-                const featuresRes = await fetch(`https://api.spotify.com/v1/audio-features?ids=${ids}`, {
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
-                });
-                const featuresData = await featuresRes.json();
-
-                playlistSmart = [];
-                featuresData.audio_features.forEach((feat, index) => {
-                    if (feat && feat.tempo >= 100 && feat.tempo <= 120) {
-                        playlistSmart.push({
-                            uri: tracksData.items[index].uri,
-                            name: tracksData.items[index].name,
-                            artist: tracksData.items[index].artists[0].name,
-                            bpm: Math.round(feat.tempo)
-                        });
-                    }
-                });
-
-                if (playlistSmart.length > 0) {
-                    document.getElementById('spotify-status').innerHTML = `🎵 <b>Sincronización con éxito</b>. Encontradas ${playlistSmart.length} canciones ideales tuyas (100-120 BPM). Mantén Spotify abierto en tu móvil o PC.`;
-                } else {
-                    document.getElementById('spotify-status').textContent = "🎵 No se hallaron canciones exactas a 100-120 BPM. Usaremos tu lista superior por defecto.";
-                    playlistSmart = tracksData.items.map(t => ({ uri: t.uri, name: t.name, artist: t.artists[0].name, bpm: 'N/A' }));
-                }
-            } catch (err) {
-                console.error(err);
-                document.getElementById('spotify-status').textContent = "❌ Error en los servidores de análisis de pistas.";
-            }
-        }
-
-        // CORRECCIÓN: Endpoints de control de reproducción de Spotify
-        async function controlSpotify(action, uri = null) {
-            if (!accessToken || playlistSmart.length === 0) return;
-            
-            let url = 'https://api.spotify.com/v1/me/player/pause'; 
-            let method = 'PUT';
-            let body = null;
-
-            if (action === 'play') {
-                url = 'https://api.spotify.com/v1/me/player/play';
-                if (uri) body = JSON.stringify({ uris: [uri] });
-            } else if (action === 'low') {
-                url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=30';
-            } else if (action === 'restore_volume') {
-                url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=80';
-            }
-
-            try {
-                await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: body
-                });
-            } catch (e) {
-                console.log("Spotify Connect: Requiere reproductor activo.");
-            }
-        }
-
-        let currentIndex = 0;
-        let timer = null;
-        let timeLeft = 0;
-
-        const timerDisplay = document.getElementById("timer");
-        const phaseTitle = document.getElementById("phase-title");
-        const phaseDesc = document.getElementById("phase-desc");
-        const trackPlaying = document.getElementById("track-playing");
-        const infoRound = document.getElementById("info-round");
-        const infoNext = document.getElementById("info-next");
-        const startBtn = document.getElementById("start-btn");
-
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'es-ES';
-                utterance.rate = 0.92;
-                utterance.pitch = 1.05;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function updateUI() {
-            const current = workout[currentIndex];
-            timerDisplay.textContent = formatTime(timeLeft);
-            phaseTitle.textContent = current.title;
-            phaseDesc.textContent = current.desc;
-
-            if (current.type === 'rest' || current.type === 'long-rest') {
-                timerDisplay.classList.add('rest');
-            } else {
-                timerDisplay.classList.remove('rest');
-            }
-
-            infoRound.textContent = current.round ? `Bloque: Ronda ${current.round}/4` : "Bloque: Transición";
-            const next = workout[currentIndex + 1];
-            infoNext.textContent = next ? `Siguiente: ${next.title}` : "Siguiente: Fin de sesión";
-        }
-
-        function formatTime(seconds) {
-            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
-        }
-
-        function tick() {
-            if (timeLeft > 0) {
-                timeLeft--;
+<!DOCTYPE html>
                 timerDisplay.textContent = formatTime(timeLeft);
                 if (timeLeft === 10) speakText("Diez segundos finales, mantén el ritmo suave.");
             } else {
@@ -460,3 +249,312 @@
     </script>
 </body>
 </html>
+<script>
+    // CONFIGURACIÓN DE TU CLIENT ID DE SPOTIFY
+    const CLIENT_ID = '8e29fe6adc0d43b7b9c67520ebe4e17a'; 
+    const REDIRECT_URI = window.location.href.split('?')[0].split('#')[0];
+    const SCOPES = 'user-top-read user-modify-playback-state user-read-playback-state';
+
+    let accessToken = null;
+    let playlistSmart = [];
+    let currentTrackIndex = 0;
+
+    // FUNCIONES AUXILIARES CRIPTOGRÁFICAS
+    function generateRandomString(length) {
+        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const values = crypto.getRandomValues(new Uint8Array(length));
+        return Array.from(values).map((x) => possible[x % possible.length]).join('');
+    }
+
+    async function sha256(plain) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(plain);
+        return window.crypto.subtle.digest('SHA-256', data);
+    }
+
+    function base64urlencode(a) {
+        return btoa(String.fromCharCode.apply(null, new Uint8Array(a)))
+            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    async function generateCodeChallenge(v) {
+        const hashed = await sha256(v);
+        return base64urlencode(hashed);
+    }
+
+    const workout = [
+        { title: "Gato-Camello Rítmico", desc: "A cuatro patas. Sigue un tempo de 4 segundos para arquear y 4 para curvar.", duration: 150, type: "warmup", speech: "Hola. Vamos a empezar a cuidar de tu cuerpo con calma. Colócate a cuatro patas en el suelo. Respira hondo y empieza el movimiento del gato camello. Siente cómo se libera la tensión de tu espalda.", musicAction: "pause" },
+        { title: "Desbloqueo de Cadera", desc: "Tumbado boca arriba con brazos en cruz. Deja caer las rodillas juntas a cada lado.", duration: 150, type: "warmup", speech: "Muy bien. Ahora túmbate boca arriba con los brazos abiertos en cruz. Deja caer tus rodillas juntas hacia la derecha de forma suave, relaja las lumbares y respira.", musicAction: "pause" },
+        ...generateRounds(),
+        { title: "Respiración Diafragmática", desc: "Tumbado boca arriba con manos en la barriga. Relájate por completo.", duration: 120, type: "cool-down", speech: "El esfuerzo principal ha terminado, lo has hecho genial. Quédate tumbado boca arriba, pon tus manos sobre la barriga y respira hondo.", musicAction: "pause" },
+        { title: "Protocolo de Cuidado y Ducha", desc: "Quítate la ropa sudada inmediatamente. Dúchate con agua templada.", duration: 180, type: "cool-down", speech: "Sesión completada perfectamente. Ahora, ve directo a quitarte la ropa usada y disfruta de una ducha templada. Cuida mucho tu piel.", musicAction: "stop" }
+    ];
+
+    function generateRounds() {
+        let steps = [];
+        for(let r = 1; r <= 4; r++) {
+            steps.push(
+                { title: `Ronda ${r}/4: Sentadilla Adagio & Allegro`, desc: "Baja controlado en 3 tiempos de tu música. Sube rápido en el 1º del siguiente compás.", duration: 45, type: "work", round: r, speech: `Ronda ${r}. Al ritmo de tu música, haz la sentadilla a la silla. Baja despacio en tres tiempos y sube rápido. Sincronízate.`, musicAction: "play" },
+                { title: "Descanso Activo", desc: "Respira hondo, relaja los brazos, muévete un poco por la habitación.", duration: 45, type: "rest", round: r, speech: "Tiempo de descanso. Suelta las piernas y respira con calma.", musicAction: "low" },
+                { title: `Ronda ${r}/4: El Contrapunto del Escarabajo`, desc: "Espalda baja pegada al suelo. Estira extremidades alternas en 2 tiempos con el ritmo.", duration: 45, type: "work", round: r, speech: "Vamos al suelo para el escarabajo. Pega tu espalda baja a la manta. Mueve tus extremidades siguiendo el pulso de tu música.", musicAction: "play" },
+                { title: "Descanso Activo", desc: "Suelta el cuerpo en el suelo, respira profundo expandiendo el abdomen.", duration: 45, type: "rest", round: r, speech: "Descansa un poco. Deja que el abdomen se relaje por completo.", musicAction: "low" },
+                { title: `Ronda ${r}/4: El Canon Lumbar`, desc: "A cuatro patas. Mantén brazo y pierna estirados fijos durante una frase musical completa.", duration: 45, type: "work", round: r, speech: "Colócate a cuatro patas para el canon lumbar. Estira brazo y pierna contraria, y mantén la posición fija en armonía con la melodía.", musicAction: "play" },
+                { title: "Descanso Activo", desc: "Siéntate sobre tus talones un momento, relaja los hombros.", duration: 45, type: "rest", round: r, speech: "Aprovecha para descansar de forma activa.", musicAction: "low" },
+                { title: `Ronda ${r}/4: Isometría Inclinada en Ostinato`, desc: "Manos en la encimera. Baja a mitad de camino y quédate quieto durante 4 tiempos musicales.", duration: 45, type: "work", round: r, speech: "Último esfuerzo del bloque. Flexión inclinada. Baja a mitad de recorrido y aguanta cuatro tiempos de la música con el abdomen duro.", musicAction: "play" }
+            );
+            if(r < 4) {
+                steps.push({ title: "Descanso de Bloque Completo", desc: "Camina un poco, hidrátate bien con agua.", duration: 120, type: "long-rest", round: r, speech: `Has terminado la ronda ${r}. Nos tomamos dos minutos enteros de descanso. Bebe un sorbo de agua sin prisa.`, musicAction: "low" });
+            }
+        }
+        return steps;
+    }
+
+    // 1. REDIRECCIÓN CON URL OFICIAL DE ACCOUNTS SPOTIFY
+    document.getElementById('login-btn').addEventListener('click', async () => {
+        const codeVerifier = generateRandomString(64);
+        const codeChallenge = await generateCodeChallenge(codeVerifier);
+        
+        window.localStorage.setItem('code_verifier', codeVerifier);
+
+        const params = new URLSearchParams({
+            client_id: CLIENT_ID,
+            response_type: 'code',
+            redirect_uri: REDIRECT_URI,
+            scope: SCOPES,
+            code_challenge_method: 'S256',
+            code_challenge: codeChallenge
+        });
+
+        window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
+    });
+
+    async function checkAuthCode() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+
+        if (code) {
+            document.getElementById('login-btn').classList.add('hidden');
+            document.getElementById('workout-ui').classList.remove('hidden');
+            document.getElementById('spotify-status').textContent = "⏳ Validando credenciales de seguridad con Spotify...";
+
+            const codeVerifier = window.localStorage.getItem('code_verifier');
+
+            const payload = new URLSearchParams({
+                client_id: CLIENT_ID,
+                grant_type: 'authorization_code',
+                code: code,
+                redirect_uri: REDIRECT_URI,
+                code_verifier: codeVerifier
+            });
+
+            try {
+                // 2. ENDPOINT OFICIAL DE OBTENCIÓN DE TOKEN
+                const res = await fetch('https://accounts.spotify.com/api/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: payload
+                });
+                
+                if (!res.ok) throw new Error("Fallo al intercambiar el código por el token.");
+                
+                const data = await res.json();
+                
+                if (data.access_token) {
+                    accessToken = data.access_token;
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    document.getElementById('spotify-status').textContent = "⏳ Analizando tus canciones favoritas (Rango: 100-120 BPM)...";
+                    getSmartTracks();
+                } else {
+                    document.getElementById('spotify-status').textContent = "❌ Error al obtener las llaves de acceso de Spotify.";
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('spotify-status').textContent = "❌ Error crítico de red en la autenticación.";
+            }
+        }
+    }
+
+    async function getSmartTracks() {
+        try {
+            // 3. ENDPOINT OFICIAL DE TOP TRACKS
+            const tracksRes = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=50', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            
+            if (!tracksRes.ok) throw new Error(`HTTP error! status: ${tracksRes.status}`);
+            const tracksData = await tracksRes.json();
+            
+            if(!tracksData.items || tracksData.items.length === 0) {
+                document.getElementById('spotify-status').textContent = "⚠️ No hay historial suficiente en este perfil. Asegúrate de reproducir música en tu app primero.";
+                return;
+            }
+
+            const ids = tracksData.items.map(item => item.id).join(',');
+
+            // 4. ENDPOINT OFICIAL DE AUDIO FEATURES
+            const featuresRes = await fetch(`https://api.spotify.com/v1/audio-features?ids=${ids}`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            
+            if (!featuresRes.ok) throw new Error(`HTTP error! status: ${featuresRes.status}`);
+            const featuresData = await featuresRes.json();
+
+            playlistSmart = [];
+            featuresData.audio_features.forEach((feat, index) => {
+                if (feat && feat.tempo >= 100 && feat.tempo <= 120) {
+                    playlistSmart.push({
+                        uri: tracksData.items[index].uri,
+                        name: tracksData.items[index].name,
+                        artist: tracksData.items[index].artists[0].name,
+                        bpm: Math.round(feat.tempo)
+                    });
+                }
+            });
+
+            if (playlistSmart.length > 0) {
+                document.getElementById('spotify-status').innerHTML = `🎵 <b>Sincronización con éxito</b>. Encontradas ${playlistSmart.length} canciones ideales tuyas (100-120 BPM). Mantén Spotify abierto en tu móvil o PC.`;
+            } else {
+                document.getElementById('spotify-status').textContent = "🎵 No se hallaron canciones exactas a 100-120 BPM. Usaremos tu lista superior por defecto.";
+                playlistSmart = tracksData.items.map(t => ({ uri: t.uri, name: t.name, artist: t.artists[0].name, bpm: 'N/A' }));
+            }
+        } catch (err) {
+            console.error("Error en getSmartTracks:", err);
+            document.getElementById('spotify-status').textContent = "❌ Error en los servidores de análisis de pistas. Revisa la consola.";
+        }
+    }
+
+    async function controlSpotify(action, uri = null) {
+        if (!accessToken || playlistSmart.length === 0) return;
+        
+        let url = ''; 
+        let method = 'PUT';
+        let body = null;
+
+        // 5. ENDPOINTS OFICIALES DE REPRODUCTOR
+        if (action === 'play') {
+            url = 'https://api.spotify.com/v1/me/player/play';
+            if (uri) body = JSON.stringify({ uris: [uri] });
+        } else if (action === 'low') {
+            url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=20';
+        } else if (action === 'restore_volume') {
+            url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=80';
+        } else if (action === 'pause') {
+            url = 'https://api.spotify.com/v1/me/player/pause';
+        }
+
+        try {
+            if (!url) return;
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: body
+            });
+            
+            if (response.status === 403 || response.status === 404) {
+                 console.log("Spotify Connect: No se encontró un reproductor activo. Abre Spotify en tu dispositivo y dale a reproducir algo primero.");
+            }
+        } catch (e) {
+            console.error("Error controlando Spotify:", e);
+        }
+    }
+
+    let currentIndex = 0;
+    let timer = null;
+    let timeLeft = 0;
+
+    const timerDisplay = document.getElementById("timer");
+    const phaseTitle = document.getElementById("phase-title");
+    const phaseDesc = document.getElementById("phase-desc");
+    const trackPlaying = document.getElementById("track-playing");
+    const infoRound = document.getElementById("info-round");
+    const infoNext = document.getElementById("info-next");
+    const startBtn = document.getElementById("start-btn");
+
+    function speakText(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.92;
+            utterance.pitch = 1.05;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function updateUI() {
+        const current = workout[currentIndex];
+        timerDisplay.textContent = formatTime(timeLeft);
+        phaseTitle.textContent = current.title;
+        phaseDesc.textContent = current.desc;
+
+        if (current.type === 'rest' || current.type === 'long-rest') {
+            timerDisplay.classList.add('rest');
+        } else {
+            timerDisplay.classList.remove('rest');
+        }
+
+        infoRound.textContent = current.round ? `Bloque: Ronda ${current.round}/4` : "Bloque: Transición";
+        const next = workout[currentIndex + 1];
+        infoNext.textContent = next ? `Siguiente: ${next.title}` : "Siguiente: Fin de sesión";
+    }
+
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function tick() {
+        if (timeLeft > 0) {
+            timeLeft--;
+            timerDisplay.textContent = formatTime(timeLeft);
+            if (timeLeft === 10) speakText("Diez segundos finales, mantén el ritmo suave.");
+        } else {
+            currentIndex++;
+            if (currentIndex < workout.length) {
+                initStep();
+            } else {
+                clearInterval(timer);
+                phaseTitle.textContent = "¡Completado!";
+                phaseDesc.textContent = "Sesión finalizada. Has cuidado de tu espalda y activado tu abdomen de manera brillante.";
+                trackPlaying.textContent = "";
+            }
+        }
+    }
+
+    async function initStep() {
+        const current = workout[currentIndex];
+        timeLeft = current.duration;
+        updateUI();
+        
+        speakText(current.speech);
+
+        if (current.musicAction === 'play' && playlistSmart.length > 0) {
+            const track = playlistSmart[currentTrackIndex];
+            trackPlaying.textContent = `🔊 Sonando en tu Spotify: ${track.name} - ${track.artist} (${track.bpm} BPM)`;
+            await controlSpotify('restore_volume');
+            await controlSpotify('play', track.uri);
+            currentTrackIndex = (currentTrackIndex + 1) % playlistSmart.length;
+        } else if (current.musicAction === 'low') {
+            await controlSpotify('low');
+            trackPlaying.textContent = "💤 Bajando volumen de la música para descansar...";
+        } else if (current.musicAction === 'pause' || current.musicAction === 'stop') {
+            await controlSpotify('pause');
+            trackPlaying.textContent = "";
+        }
+    }
+
+    startBtn.addEventListener('click', () => {
+        speakText(""); 
+        currentIndex = 0;
+        startBtn.classList.add('hidden');
+        initStep();
+        clearInterval(timer);
+        timer = setInterval(tick, 1000);
+    });
+
+    checkAuthCode();
+</script>
