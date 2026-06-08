@@ -208,22 +208,22 @@
         let steps = [];
         for(let r = 1; r <= 4; r++) {
             steps.push(
-                { title: `Ronda ${r}/4: Sentadilla Adagio & Allegro`, desc: "Baja controlado en 3 tiempos de tu música. Sube rápido en el 1º del siguiente compás.", duration: 45, type: "work", round: r, speech: `Ronda ${r}. Al ritmo de tu música, haz la sentadilla a la silla. Baja despacio en tres tiempos y sube rápido. Sincronízate.`, musicAction: "play" },
+                { title: "Ronda " + r + "/4: Sentadilla Adagio & Allegro", desc: "Baja controlado en 3 tiempos de tu música. Sube rápido en el 1º del siguiente compás.", duration: 45, type: "work", round: r, speech: "Ronda " + r + ". Al ritmo de tu música, haz la sentadilla a la silla. Baja despacio en tres tiempos y sube rápido. Sincronízate.", musicAction: "play" },
                 { title: "Descanso Activo", desc: "Respira hondo, relaja los brazos, muévete un poco por la habitación.", duration: 45, type: "rest", round: r, speech: "Tiempo de descanso. Suelta las piernas y respira con calma.", musicAction: "low" },
-                { title: `Ronda ${r}/4: El Contrapunto del Escarabajo`, desc: "Espalda baja pegada al suelo. Estira extremidades alternas en 2 tiempos con el ritmo.", duration: 45, type: "work", round: r, speech: "Vamos al suelo para el escarabajo. Pega tu espalda baja a la manta. Mueve tus extremidades siguiendo el pulso de tu música.", musicAction: "play" },
+                { title: "Ronda " + r + "/4: El Contrapunto del Escarabajo", desc: "Espalda baja pegada al suelo. Estira extremidades alternas en 2 tiempos con el ritmo.", duration: 45, type: "work", round: r, speech: "Vamos al suelo para el escarabajo. Pega tu espalda baja a la manta. Mueve tus extremidades siguiendo el pulso de tu música.", musicAction: "play" },
                 { title: "Descanso Activo", desc: "Suelta el cuerpo en el suelo, respira profundo expandiendo el abdomen.", duration: 45, type: "rest", round: r, speech: "Descansa un poco. Deja que el abdomen se relaje por completo.", musicAction: "low" },
-                { title: `Ronda ${r}/4: El Canon Lumbar`, desc: "A cuatro patas. Mantén brazo y pierna estirados fijos durante una frase musical completa.", duration: 45, type: "work", round: r, speech: "Colócate a cuatro patas para el canon lumbar. Estira brazo y pierna contraria, y mantén la posición fija en armonía con la melodía.", musicAction: "play" },
+                { title: "Ronda " + r + "/4: El Canon Lumbar", desc: "A cuatro patas. Mantén brazo y pierna estirados fijos durante una frase musical completa.", duration: 45, type: "work", round: r, speech: "Colócate a cuatro patas para el canon lumbar. Estira brazo y pierna contraria, y mantén la posición fija en armonía con la melodía.", musicAction: "play" },
                 { title: "Descanso Activo", desc: "Siéntate sobre tus talones un momento, relaja los hombros.", duration: 45, type: "rest", round: r, speech: "Aprovecha para descansar de forma activa.", musicAction: "low" },
-                { title: `Ronda ${r}/4: Isometría Inclinada en Ostinato`, desc: "Manos en la encimera. Baja a mitad de camino y quédate quieto durante 4 tiempos musicales.", duration: 45, type: "work", round: r, speech: "Último esfuerzo del bloque. Flexión inclinada. Baja a mitad de recorrido y aguanta cuatro tiempos de la música con el abdomen duro.", musicAction: "play" }
+                { title: "Ronda " + r + "/4: Isometría Inclinada en Ostinato", desc: "Manos en la encimera. Baja a mitad de camino y quédate quieto durante 4 tiempos musicales.", duration: 45, type: "work", round: r, speech: "Último esfuerzo del bloque. Flexión inclinada. Baja a mitad de recorrido y aguanta cuatro tiempos de la música con el abdomen duro.", musicAction: "play" }
             );
             if(r < 4) {
-                steps.push({ title: "Descanso de Bloque Completo", desc: "Camina un poco, hidrátate bien con agua.", duration: 120, type: "long-rest", round: r, speech: `Has terminado la ronda ${r}. Nos tomamos dos minutos enteros de descanso. Bebe un sorbo de agua sin prisa.`, musicAction: "low" });
+                steps.push({ title: "Descanso de Bloque Completo", desc: "Camina un poco, hidrátate bien con agua.", duration: 120, type: "long-rest", round: r, speech: "Has terminado la ronda " + r + ". Nos tomamos dos minutos enteros de descanso. Bebe un sorbo de agua sin prisa.", musicAction: "low" });
             }
         }
         return steps;
     }
 
-    // 1. REDIRECCIÓN CON URL OFICIAL DE ACCOUNTS SPOTIFY
+    // 1. URL OFICIAL PARA EL LOGIN DE SPOTIFY
     document.getElementById('login-btn').addEventListener('click', async () => {
         const codeVerifier = generateRandomString(64);
         const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -239,7 +239,7 @@
             code_challenge: codeChallenge
         });
 
-        window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
+        window.location.href = "https://accounts.spotify.com/authorize?" + params.toString();
     });
 
     async function checkAuthCode() {
@@ -262,7 +262,7 @@
             });
 
             try {
-                // 2. ENDPOINT OFICIAL DE OBTENCIÓN DE TOKEN
+                // 2. URL OFICIAL PARA OBTENER EL TOKEN
                 const res = await fetch('https://accounts.spotify.com/api/token', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -290,12 +290,12 @@
 
     async function getSmartTracks() {
         try {
-            // 3. ENDPOINT OFICIAL DE TOP TRACKS
-            const tracksRes = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=50', {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
+            // 3. URL OFICIAL PARA TOP TRACKS
+            const tracksRes = await fetch('https://api.spotify.com/v1/me/top/tracks', {
+                headers: { 'Authorization': 'Bearer ' + accessToken }
             });
             
-            if (!tracksRes.ok) throw new Error(`HTTP error! status: ${tracksRes.status}`);
+            if (!tracksRes.ok) throw new Error("Error HTTP status: " + tracksRes.status);
             const tracksData = await tracksRes.json();
             
             if(!tracksData.items || tracksData.items.length === 0) {
@@ -305,12 +305,12 @@
 
             const ids = tracksData.items.map(item => item.id).join(',');
 
-            // 4. ENDPOINT OFICIAL DE AUDIO FEATURES
-            const featuresRes = await fetch(`https://api.spotify.com/v1/audio-features?ids=${ids}`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
+            // 4. URL OFICIAL PARA AUDIO FEATURES
+            const featuresRes = await fetch('https://api.spotify.com/v1/audio-features?ids=' + ids, {
+                headers: { 'Authorization': 'Bearer ' + accessToken }
             });
             
-            if (!featuresRes.ok) throw new Error(`HTTP error! status: ${featuresRes.status}`);
+            if (!featuresRes.ok) throw new Error("Error HTTP status: " + featuresRes.status);
             const featuresData = await featuresRes.json();
 
             playlistSmart = [];
@@ -326,7 +326,7 @@
             });
 
             if (playlistSmart.length > 0) {
-                document.getElementById('spotify-status').innerHTML = `🎵 <b>Sincronización con éxito</b>. Encontradas ${playlistSmart.length} canciones ideales tuyas (100-120 BPM). Mantén Spotify abierto en tu móvil o PC.`;
+                document.getElementById('spotify-status').innerHTML = "🎵 <b>Sincronización con éxito</b>. Encontradas " + playlistSmart.length + " canciones ideales tuyas (100-120 BPM). Mantén Spotify abierto en tu móvil o PC.";
             } else {
                 document.getElementById('spotify-status').textContent = "🎵 No se hallaron canciones exactas a 100-120 BPM. Usaremos tu lista superior por defecto.";
                 playlistSmart = tracksData.items.map(t => ({ uri: t.uri, name: t.name, artist: t.artists[0].name, bpm: 'N/A' }));
@@ -344,14 +344,14 @@
         let method = 'PUT';
         let body = null;
 
-        // 5. ENDPOINTS OFICIALES DE REPRODUCTOR
+        // 5. URLS OFICIALES PARA EL CONTROL DE REPRODUCCIÓN
         if (action === 'play') {
             url = 'https://api.spotify.com/v1/me/player/play';
             if (uri) body = JSON.stringify({ uris: [uri] });
         } else if (action === 'low') {
-            url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=20';
+            url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=30';
         } else if (action === 'restore_volume') {
-            url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=80';
+            url = 'https://api.spotify.com/v1/me/player/volume?volume_percent=100';
         } else if (action === 'pause') {
             url = 'https://api.spotify.com/v1/me/player/pause';
         }
@@ -361,7 +361,7 @@
             const response = await fetch(url, {
                 method: method,
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`,
+                    'Authorization': 'Bearer ' + accessToken,
                     'Content-Type': 'application/json'
                 },
                 body: body
@@ -410,15 +410,15 @@
             timerDisplay.classList.remove('rest');
         }
 
-        infoRound.textContent = current.round ? `Bloque: Ronda ${current.round}/4` : "Bloque: Transición";
+        infoRound.textContent = current.round ? "Bloque: Ronda " + current.round + "/4" : "Bloque: Transición";
         const next = workout[currentIndex + 1];
-        infoNext.textContent = next ? `Siguiente: ${next.title}` : "Siguiente: Fin de sesión";
+        infoNext.textContent = next ? "Siguiente: " + next.title : "Siguiente: Fin de sesión";
     }
 
     function formatTime(seconds) {
         const m = Math.floor(seconds / 60).toString().padStart(2, '0');
         const s = (seconds % 60).toString().padStart(2, '0');
-        return `${m}:${s}`;
+        return m + ":" + s;
     }
 
     function tick() {
@@ -448,7 +448,7 @@
 
         if (current.musicAction === 'play' && playlistSmart.length > 0) {
             const track = playlistSmart[currentTrackIndex];
-            trackPlaying.textContent = `🔊 Sonando en tu Spotify: ${track.name} - ${track.artist} (${track.bpm} BPM)`;
+            trackPlaying.textContent = "🔊 Sonando en tu Spotify: " + track.name + " - " + track.artist + " (" + track.bpm + " BPM)";
             await controlSpotify('restore_volume');
             await controlSpotify('play', track.uri);
             currentTrackIndex = (currentTrackIndex + 1) % playlistSmart.length;
